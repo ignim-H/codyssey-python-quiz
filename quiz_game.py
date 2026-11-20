@@ -4,6 +4,7 @@ import os
 
 from default_quizzes import create_default_quizzes
 from quiz import Quiz
+from storage import StateStore
 
 LINE = "=" * 40
 THIN_LINE = "-" * 40
@@ -14,10 +15,11 @@ class QuitGame(Exception):
 class QuizGame:
     """퀴즈 목록과 최고 점수를 가지고 게임 전체를 진행한다."""
 
-    def __init__(self):
-        self.quizzes = create_default_quizzes()  # Quiz 객체 목록
+    def __init__(self, state_path="state.json"):
+        self.quizzes = []  # Quiz 객체 목록 (load 에서 채움)
         self.best_score = None   # 최고 점수(0~100). 아직 풀지 않았으면 None
         self.best_record = None  # 최고 점수를 낸 기록 {"correct": 맞힌 수, "total": 문제 수}
+        self.store = StateStore(state_path)
         self.echo_input = os.environ.get("QUIZ_ECHO_INPUT") == "1"  # 파일로 입력할 때 입력값도 화면에 표시
     MENU_ITEMS = ["퀴즈 풀기", "퀴즈 추가", "퀴즈 목록", "점수 확인", "종료"]
 
@@ -28,6 +30,7 @@ class QuizGame:
         print("        🎯 나만의 퀴즈 게임 🎯")
         print(LINE)
         try:
+            self.load()
             while True:
                 choice = self.select_menu()
                 if choice == 1:
@@ -42,8 +45,11 @@ class QuizGame:
                     break
         except QuitGame:
             print("\n⚠️ 입력이 중단되었습니다.")
+            if self.save():
+                print("💾 현재까지의 데이터를 저장했습니다.")
             print("👋 게임을 안전하게 종료합니다.")
             return
+        self.save()
         print("👋 게임을 종료합니다. 다음에 또 만나요!")
 
     def show_menu(self):
@@ -125,6 +131,7 @@ class QuizGame:
             self.best_record = {"correct": correct, "total": total}
             print("🎉 새로운 최고 점수입니다!")
         print(LINE)
+        self.save()
 
     # ------------------------------------------------------------------ 퀴즈 추가
     def add_quiz(self):
@@ -134,6 +141,7 @@ class QuizGame:
         choices = [self.read_text(f"선택지 {index}: ") for index in range(1, Quiz.CHOICE_COUNT + 1)]
         answer = self.read_number(f"정답 번호 (1-{Quiz.CHOICE_COUNT}): ", 1, Quiz.CHOICE_COUNT)
         self.quizzes.append(Quiz(question, choices, answer))
+        self.save()
         print(f"\n✅ 퀴즈가 추가되었습니다! (총 {len(self.quizzes)}개)")
 
     # ------------------------------------------------------------------ 퀴즈 목록
@@ -158,3 +166,42 @@ class QuizGame:
         if self.best_record:
             detail = f" ({self.best_record['total']}문제 중 {self.best_record['correct']}문제 정답)"
         print(f"\n🏆 최고 점수: {self.best_score}점{detail}")
+
+    # ------------------------------------------------------------------ 저장 / 불러오기
+    def load(self):
+        """state.json 을 불러온다. 없거나 손상되었으면 기본 퀴즈로 시작(복구)한다."""
+        data, message = self.store.load()
+        if data is not None:
+            try:
+                quizzes = [Quiz.from_dict(item) for item in data.get("quizzes", [])]
+                best_score = data.get("best_score")
+                if best_score is not None and (
+                    not isinstance(best_score, int) or isinstance(best_score, bool) or not 0 <= best_score <= 100
+                ):
+                    raise ValueError("best_score 는 0~100 사이의 정수여야 합니다")
+                best_record = data.get("best_record")
+            except (ValueError, TypeError, AttributeError) as error:
+                backup = self.store.backup_corrupted()
+                message = f"⚠️ state.json 내용이 올바르지 않아 기본 퀴즈로 복구합니다. ({error}, 원본 보관: {backup})"
+            else:
+                self.quizzes = quizzes
+                self.best_score = best_score
+                self.best_record = best_record if isinstance(best_record, dict) else None
+                best_text = f"{best_score}점" if best_score is not None else "기록 없음"
+                print(f"📂 저장된 데이터를 불러왔습니다. (퀴즈 {len(quizzes)}개, 최고점수 {best_text})")
+                return
+
+        print(message)
+        self.quizzes = create_default_quizzes()
+        self.best_score = None
+        self.best_record = None
+        self.save()
+
+    def save(self):
+        """퀴즈 목록과 최고 점수를 state.json 에 저장한다. 성공하면 True."""
+        data = {
+            "quizzes": [quiz.to_dict() for quiz in self.quizzes],
+            "best_score": self.best_score,
+            "best_record": self.best_record,
+        }
+        return self.store.save(data)
