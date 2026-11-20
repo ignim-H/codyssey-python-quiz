@@ -5,10 +5,11 @@ class Quiz:
 
     CHOICE_COUNT = 4
 
-    def __init__(self, question, choices, answer):
+    def __init__(self, question, choices, answer, hint=""):
         self.question = question      # 문제 문장 (str)
         self.choices = list(choices)  # 선택지 4개 (list[str])
         self.answer = answer          # 정답 번호 (int, 1~4)
+        self.hint = hint              # 힌트 (str, 없으면 빈 문자열)
 
     def display(self, number=None):
         """문제와 선택지를 화면에 출력한다."""
@@ -23,6 +24,10 @@ class Quiz:
         """사용자가 고른 번호가 정답이면 True."""
         return choice_number == self.answer
 
+    def has_hint(self):
+        """힌트가 등록되어 있으면 True."""
+        return bool(self.hint)
+
     def to_dict(self):
         """JSON 으로 저장할 수 있는 dict 로 변환한다."""
         data = {
@@ -30,6 +35,8 @@ class Quiz:
             "choices": self.choices,
             "answer": self.answer,
         }
+        if self.hint:
+            data["hint"] = self.hint
         return data
 
     @classmethod
@@ -41,6 +48,7 @@ class Quiz:
         question = data.get("question")
         choices = data.get("choices")
         answer = data.get("answer")
+        hint = data.get("hint", "")
 
         if not isinstance(question, str) or not question.strip():
             raise ValueError("question 이 비어 있거나 문자열이 아닙니다")
@@ -53,5 +61,7 @@ class Quiz:
         # bool 은 int 의 하위 타입이라 따로 걸러낸다 (True == 1 방지)
         if not isinstance(answer, int) or isinstance(answer, bool) or not 1 <= answer <= cls.CHOICE_COUNT:
             raise ValueError("answer 는 1~4 사이의 정수여야 합니다")
+        if not isinstance(hint, str):
+            raise ValueError("hint 는 문자열이어야 합니다")
 
-        return cls(question.strip(), [choice.strip() for choice in choices], answer)
+        return cls(question.strip(), [choice.strip() for choice in choices], answer, hint.strip())

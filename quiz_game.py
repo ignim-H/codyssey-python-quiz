@@ -1,6 +1,7 @@
 """퀴즈 게임 전체 흐름(메뉴 · 퀴즈 풀기 · 추가 · 목록 · 점수)을 관리하는 QuizGame 클래스."""
 
 import os
+import random
 
 from default_quizzes import create_default_quizzes
 from quiz import Quiz
@@ -15,12 +16,16 @@ class QuitGame(Exception):
 class QuizGame:
     """퀴즈 목록과 최고 점수를 가지고 게임 전체를 진행한다."""
 
+    HINT_PENALTY = 0.5  # 힌트를 본 문제는 맞혀도 절반 점수
+
     def __init__(self, state_path="state.json"):
         self.quizzes = []  # Quiz 객체 목록 (load 에서 채움)
         self.best_score = None   # 최고 점수(0~100). 아직 풀지 않았으면 None
         self.best_record = None  # 최고 점수를 낸 기록 {"correct": 맞힌 수, "total": 문제 수}
         self.store = StateStore(state_path)
         self.echo_input = os.environ.get("QUIZ_ECHO_INPUT") == "1"  # 파일로 입력할 때 입력값도 화면에 표시
+        # QUIZ_RANDOM_SEED 를 주면 출제 순서가 매번 같아진다 (테스트/시연용). 없으면 매번 무작위.
+        self.random = random.Random(os.environ.get("QUIZ_RANDOM_SEED"))
         # 메뉴 번호 → (이름, 실행할 메서드). 메뉴를 추가할 때 이 목록만 고치면 된다.
         self.menu = [
             ("퀴즈 풀기", self.play_quiz),
@@ -77,13 +82,15 @@ class QuizGame:
             print(value)
         return value.strip()
 
-    def read_number(self, prompt, low, high):
+    def read_number(self, prompt, low, high, allowed_words=()):
         """low~high 범위의 정수를 받을 때까지 반복한다."""
         while True:
             text = self.read_line(prompt)
             if text == "":
                 print(f"⚠️ 입력이 비어 있습니다. {low}-{high} 사이의 숫자를 입력하세요.")
                 continue
+            if text.lower() in allowed_words:  # 예: 힌트 보기 'h'
+                return text.lower()
             try:
                 number = int(text)
             except ValueError:
@@ -109,24 +116,41 @@ class QuizGame:
             print("\n📭 등록된 퀴즈가 없습니다. 먼저 퀴즈를 추가해 주세요.")
             return
 
-        selected = list(self.quizzes)
-        print(f"\n📝 퀴즈를 시작합니다! (총 {len(selected)}문제)")
+        available = len(self.quizzes)
+        count = self.read_number(f"몇 문제를 풀까요? (1-{available}): ", 1, available)
+        selected = self.random.sample(self.quizzes, count)  # 순서를 무작위로 섞어서 count 개 출제
+        print(f"\n📝 퀴즈를 시작합니다! (총 {count}문제, 힌트를 보면 해당 문제는 절반 점수)")
+
         correct = 0
+        points = 0.0
+        hints_used = 0
         for number, quiz in enumerate(selected, start=1):
             print(THIN_LINE)
             quiz.display(number)
-            answer = self.read_number("정답 입력 (1-4): ", 1, 4)
+            used_hint = False
+            while True:
+                if quiz.has_hint() and not used_hint:
+                    answer = self.read_number("정답 입력 (1-4, 힌트: h): ", 1, Quiz.CHOICE_COUNT, ("h",))
+                else:
+                    answer = self.read_number("정답 입력 (1-4): ", 1, Quiz.CHOICE_COUNT)
+                if answer != "h":
+                    break
+                used_hint = True
+                hints_used += 1
+                print(f"💡 힌트: {quiz.hint}")
+
             if quiz.is_correct(answer):
                 correct += 1
-                print("✅ 정답입니다!")
+                points += self.HINT_PENALTY if used_hint else 1
+                print("✅ 정답입니다!" + (" (힌트 사용: 절반 점수)" if used_hint else ""))
             else:
                 print(f"❌ 오답입니다. 정답은 {quiz.answer}번 '{quiz.choices[quiz.answer - 1]}' 입니다.")
             print()
 
-        total = len(selected)
-        score = round(correct / total * 100)
+        total = count
+        score = round(points / total * 100)
         print(LINE)
-        print(f"🏆 결과: {total}문제 중 {correct}문제 정답! ({score}점)")
+        print(f"🏆 결과: {total}문제 중 {correct}문제 정답! ({score}점, 힌트 {hints_used}회 사용)")
         if self.best_score is None or score > self.best_score:
             self.best_score = score
             self.best_record = {"correct": correct, "total": total}
@@ -141,7 +165,8 @@ class QuizGame:
         question = self.read_text("문제를 입력하세요: ")
         choices = [self.read_text(f"선택지 {index}: ") for index in range(1, Quiz.CHOICE_COUNT + 1)]
         answer = self.read_number(f"정답 번호 (1-{Quiz.CHOICE_COUNT}): ", 1, Quiz.CHOICE_COUNT)
-        self.quizzes.append(Quiz(question, choices, answer))
+        hint = self.read_line("힌트 (없으면 Enter): ")
+        self.quizzes.append(Quiz(question, choices, answer, hint))
         self.save()
         print(f"\n✅ 퀴즈가 추가되었습니다! (총 {len(self.quizzes)}개)")
 
@@ -154,7 +179,8 @@ class QuizGame:
         print(f"\n📋 등록된 퀴즈 목록 (총 {len(self.quizzes)}개)")
         print(THIN_LINE)
         for number, quiz in enumerate(self.quizzes, start=1):
-            print(f"[{number}] {quiz.question}")
+            mark = " 💡" if quiz.has_hint() else ""
+            print(f"[{number}] {quiz.question}{mark}")
         print(THIN_LINE)
 
     # ------------------------------------------------------------------ 점수 확인
