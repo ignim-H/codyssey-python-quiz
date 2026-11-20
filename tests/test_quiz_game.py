@@ -64,6 +64,21 @@ class StateStoreTest(unittest.TestCase):
         self.assertEqual(data["note"], "한글")
         self.assertIn("한글", self.path.read_text(encoding="utf-8"))
 
+    def test_save_retries_when_file_is_temporarily_locked(self):
+        real_replace = __import__("os").replace
+        calls = {"count": 0}
+
+        def flaky_replace(src, dst):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise PermissionError(5, "액세스가 거부되었습니다")
+            return real_replace(src, dst)
+
+        with patch("storage.os.replace", side_effect=flaky_replace), patch("storage.time.sleep"):
+            self.assertTrue(self.store.save({"quizzes": [], "best_score": None}))
+        self.assertEqual(calls["count"], 2)
+        self.assertTrue(self.path.exists())
+
     def test_corrupted_file_is_backed_up(self):
         self.path.write_text("{broken", encoding="utf-8")
         data, message = self.store.load()

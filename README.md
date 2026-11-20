@@ -135,6 +135,7 @@ codyssey-python-quiz/
 | `state.json` 없음 | 기본 퀴즈로 시작하고 파일 생성 |
 | JSON 손상 / 구조 오류 | 안내 후 원본을 `state.json.bak` 으로 보관하고 기본 퀴즈로 복구 |
 | 읽기/쓰기 오류 (`OSError`) | 안내 메시지 출력, 프로그램은 계속 실행 |
+| 저장 직후 파일 잠금 (Windows `WinError 5`) | 잠시 기다렸다가 최대 5번 다시 시도, 그래도 실패하면 안내 (실행 화면 캡처 중 실제로 발생해 수정) |
 
 ## 8. 실행 화면
 
@@ -172,7 +173,7 @@ codyssey-python-quiz/
 python -m unittest discover -s tests -v
 ```
 
-Quiz 검증, 파일 저장/손상 복구, 잘못된 입력 재시도, Ctrl+C 안전 종료, 최고 점수 유지 등 11개 테스트 → 결과: [docs/test_result.log](docs/test_result.log)
+Quiz 검증, 파일 저장/손상 복구, 잘못된 입력 재시도, Ctrl+C 안전 종료, 최고 점수 유지 등 12개 테스트 → 결과: [docs/test_result.log](docs/test_result.log)
 
 ## 11. 개념 정리
 

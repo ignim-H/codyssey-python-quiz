@@ -10,8 +10,9 @@ test_is_correct (test_quiz_game.QuizTest.test_is_correct) ... ok
 test_corrupted_file_is_backed_up (test_quiz_game.StateStoreTest.test_corrupted_file_is_backed_up) ... ok
 test_missing_file (test_quiz_game.StateStoreTest.test_missing_file) ... ok
 test_save_and_load_utf8 (test_quiz_game.StateStoreTest.test_save_and_load_utf8) ... ok
+test_save_retries_when_file_is_temporarily_locked (test_quiz_game.StateStoreTest.test_save_retries_when_file_is_temporarily_locked) ... ok
 
 ----------------------------------------------------------------------
-Ran 11 tests in 0.018s
+Ran 12 tests in 0.020s
 
 OK
