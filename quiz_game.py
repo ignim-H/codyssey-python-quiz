@@ -30,7 +30,7 @@ class QuizGame:
             while True:
                 choice = self.select_menu()
                 if choice == 1:
-                    print("🚧 준비 중인 기능입니다.")
+                    self.play_quiz()
                 elif choice == 2:
                     print("🚧 준비 중인 기능입니다.")
                 elif choice == 3:
@@ -85,3 +85,34 @@ class QuizGame:
                 print(f"⚠️ 범위를 벗어났습니다. {low}-{high} 사이의 숫자를 입력하세요.")
                 continue
             return number
+
+    # ------------------------------------------------------------------ 퀴즈 풀기
+    def play_quiz(self):
+        """퀴즈를 출제하고 정답 여부와 결과를 보여 준 뒤 최고 점수를 갱신한다."""
+        if not self.quizzes:
+            print("\n📭 등록된 퀴즈가 없습니다. 먼저 퀴즈를 추가해 주세요.")
+            return
+
+        selected = list(self.quizzes)
+        print(f"\n📝 퀴즈를 시작합니다! (총 {len(selected)}문제)")
+        correct = 0
+        for number, quiz in enumerate(selected, start=1):
+            print(THIN_LINE)
+            quiz.display(number)
+            answer = self.read_number("정답 입력 (1-4): ", 1, 4)
+            if quiz.is_correct(answer):
+                correct += 1
+                print("✅ 정답입니다!")
+            else:
+                print(f"❌ 오답입니다. 정답은 {quiz.answer}번 '{quiz.choices[quiz.answer - 1]}' 입니다.")
+            print()
+
+        total = len(selected)
+        score = round(correct / total * 100)
+        print(LINE)
+        print(f"🏆 결과: {total}문제 중 {correct}문제 정답! ({score}점)")
+        if self.best_score is None or score > self.best_score:
+            self.best_score = score
+            self.best_record = {"correct": correct, "total": total}
+            print("🎉 새로운 최고 점수입니다!")
+        print(LINE)
