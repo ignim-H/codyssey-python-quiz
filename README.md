@@ -122,6 +122,22 @@ codyssey-python-quiz/
 
 **점수 계산**: `점수 = round(획득 점수 / 문제 수 × 100)`, 정답 1점 · 힌트 사용 후 정답 0.5점 · 오답 0점
 
+### JSON 저장 방식의 한계와 대안
+
+이 게임처럼 데이터가 작고(퀴즈 수십 개) 한 사람이 쓰는 프로그램에는 JSON 이 가장 단순하고 읽기 쉬운 선택이지만, 다음 한계가 있다.
+
+| 한계 | 이유 | 대안 |
+|---|---|---|
+| 저장할 때마다 파일 전체를 다시 씀 | JSON 은 일부만 고쳐 쓸 수 없음 → 데이터가 커질수록 저장이 느려짐 | 기록(history)처럼 계속 쌓이는 데이터는 한 줄씩 덧붙이는 JSON Lines, 또는 SQLite |
+| 실행 시 전체를 메모리에 올림 | `json.load` 는 파일 전체를 한 번에 읽음 | 대용량이면 SQLite 처럼 필요한 행만 조회 |
+| 검색·정렬·집계 불가 | 파일에서 바로 조건 검색 불가, 모두 읽어서 파이썬으로 처리 | SQLite (`sqlite3` 표준 라이브러리) 의 SQL 질의 |
+| 동시 접근에 약함 | 두 프로그램이 동시에 저장하면 나중 것이 덮어씀 | DB 의 트랜잭션/잠금 |
+| 스키마 강제 없음 | 키가 빠지거나 타입이 틀려도 파일은 저장됨 | 불러올 때 `Quiz.from_dict` 로 검증 (현재 구현), DB 면 컬럼 타입 |
+
+- **현재 구현의 보완책**: 임시 파일에 쓴 뒤 교체(저장 중 오류에도 원본 보존), 불러올 때 구조 검증, 손상 시 백업 후 기본 데이터 복구
+- **백업 보관 정책**: 손상된 파일은 `state.json.bak` 하나로 보관하며 다음 손상 때 덮어쓴다 (가장 최근 1개만 유지)
+- **스키마 호환**: 새 필드는 `data.get("필드", 기본값)` 으로 읽어서, 예전 형식의 state.json 도 그대로 불러온다 (예: `hint`, `history` 가 없는 예전 파일도 정상 동작)
+
 ## 7. 입력 · 예외 처리
 
 | 상황 | 처리 |
@@ -164,6 +180,58 @@ codyssey-python-quiz/
 - clone / pull 실습: 저장소를 별도 폴더(`codyssey-python-quiz-clone`)에 clone → README 한 줄 추가 후 commit/push → 원래 폴더에서 `pull` 로 반영 확인
 - 사용한 명령: `init`, `add`, `commit`, `push`, `pull`, `checkout`, `clone`, `merge`, `remote`
 - 실제 실행 기록: [docs/git_workflow.log](docs/git_workflow.log)
+
+### 커밋 메시지 규칙
+
+형식: **`타입: 변경 요약 (세부 내용)`** — 한 커밋에는 한 가지 기능/수정만 담고, 메시지만 읽어도 무엇이 바뀌었는지 알 수 있게 쓴다.
+
+| 타입 | 언제 쓰나 | 이 저장소의 예 |
+|---|---|---|
+| `Feat` | 새 기능 추가 | `Feat: 퀴즈 추가 기능 구현 (문제·선택지 4개·정답 번호 입력 검증)` |
+| `Fix` | 버그 수정 | `Fix: Windows 에서 state.json 교체가 일시적으로 거부될 때(WinError 5) 재시도` |
+| `Refactor` | 동작은 같고 구조만 개선 | `Refactor: QuizGame 메뉴 처리를 메뉴 테이블로 정리` |
+| `Docs` | 문서·스크린샷 | `Docs: README 작성 (...)` |
+| `Test` | 테스트 추가/수정 | `Test: Quiz·StateStore·QuizGame 단위 테스트 추가` |
+| `Chore` | 설정 등 기타 | `Chore: 프로젝트 초기 설정 (.gitignore, README)` |
+| `Merge` | 브랜치 병합 | `Merge: feature/play-quiz 브랜치 병합 (퀴즈 풀기 기능)` |
+
+- 제목은 한 줄로, "무엇을 했는지"를 동사로 끝낸다 (구현, 추가, 수정, 정리)
+- 괄호 안에 범위나 핵심 세부사항을 적는다 → `git log --oneline` 만 봐도 흐름이 보인다
+- "update", "수정함" 처럼 내용을 알 수 없는 메시지는 쓰지 않는다
+
+### 커밋 이력 (실제 `git log --oneline --graph --all` 출력)
+
+- 원격 저장소: https://github.com/ignim-H/codyssey-python-quiz
+- 커밋 수: **22개** (이 README 보완 커밋 직전 기준, 요구 10개 이상)
+- 브랜치: `feature/play-quiz`, `main`, `origin/feature/play-quiz`, `origin/main`
+- 병합 방식: `--no-ff` — 빨리 감기(fast-forward)로 합치면 브랜치가 있었다는 흔적이 사라지므로, 병합 커밋을 남겨 "퀴즈 풀기 기능은 별도 브랜치에서 개발 후 합쳤다"는 이력이 그래프에 보이도록 했다. (rebase 는 이력을 한 줄로 깔끔하게 만들지만 이미 push 한 커밋의 해시가 바뀌어 협업 시 위험)
+
+```text
+* 3bf8730 Docs: 실행 화면 다시 캡처 (터미널 한글 글꼴 개선)
+* f8fe44b Docs: 실행 화면 다시 캡처 (저장 재시도 수정 반영)
+* 3d98ac4 Fix: Windows 에서 state.json 교체가 일시적으로 거부될 때(WinError 5) 재시도
+* 4d6d88f Docs: 실행 화면 다시 캡처 (터미널 한글 글꼴 개선)
+* 4caf24a Docs: 실행 화면 스크린샷·데모 입력·Git/테스트 로그 추가
+* 7cd76e0 Docs: clone 실습 - 복제한 저장소에서 README 문구 추가
+* 476490d Docs: README 작성 (개요·주제 선정 이유·실행 방법·기능·파일 구조·state.json)
+* 7375e59 Test: Quiz·StateStore·QuizGame 단위 테스트 추가
+* bc6224d Feat: 점수 기록 히스토리 저장 및 표시 (보너스)
+* 5b1f89e Feat: 퀴즈 삭제 기능 추가 (보너스)
+* d81b2b3 Feat: 랜덤 출제·문제 수 선택·힌트 기능 추가 (보너스)
+* bab334c Refactor: QuizGame 메뉴 처리를 메뉴 테이블로 정리
+* 3263202 Feat: state.json 저장/불러오기 구현 (UTF-8, 손상 파일 백업 후 복구)
+* 262e8e8 Feat: 점수 확인 기능 구현 (미응시 안내 포함)
+* 3fda1dd Feat: 퀴즈 목록 기능 구현
+* cee6ab4 Feat: 퀴즈 추가 기능 구현 (문제·선택지 4개·정답 번호 입력 검증)
+*   a5dc062 Merge: feature/play-quiz 브랜치 병합 (퀴즈 풀기 기능)
+|\  
+| * 6ee0c02 Feat: 퀴즈 풀기 기능 구현 (출제·정답 확인·결과·최고 점수 갱신)
+|/  
+* 3c276be Feat: 기본 퀴즈 데이터 7개 작성 (주제: 리눅스·Docker·Git)
+* 642d666 Feat: Quiz 클래스 구현 (문제·선택지·정답, 출력·정답 확인·dict 변환)
+* 366800d Feat: 메뉴 출력과 입력 검증 구현 (공백·문자·범위·빈 입력, Ctrl+C/EOF 처리)
+* bdd9162 Chore: 프로젝트 초기 설정 (.gitignore, README)
+```
 
 ![git log graph](docs/screenshots/git_log_graph.png)
 
