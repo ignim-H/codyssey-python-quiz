@@ -2,6 +2,8 @@
 
 import os
 
+from default_quizzes import create_default_quizzes
+
 LINE = "=" * 40
 THIN_LINE = "-" * 40
 
@@ -12,7 +14,7 @@ class QuizGame:
     """퀴즈 목록과 최고 점수를 가지고 게임 전체를 진행한다."""
 
     def __init__(self):
-        self.quizzes = []  # Quiz 객체 목록
+        self.quizzes = create_default_quizzes()  # Quiz 객체 목록
         self.best_score = None   # 최고 점수(0~100). 아직 풀지 않았으면 None
         self.best_record = None  # 최고 점수를 낸 기록 {"correct": 맞힌 수, "total": 문제 수}
         self.echo_input = os.environ.get("QUIZ_ECHO_INPUT") == "1"  # 파일로 입력할 때 입력값도 화면에 표시
