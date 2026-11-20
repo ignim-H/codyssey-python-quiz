@@ -32,6 +32,7 @@ class QuizGame:
             ("퀴즈 추가", self.add_quiz),
             ("퀴즈 목록", self.list_quizzes),
             ("점수 확인", self.show_score),
+            ("퀴즈 삭제", self.delete_quiz),
             ("종료", None),
         ]
 
@@ -193,6 +194,22 @@ class QuizGame:
         if self.best_record:
             detail = f" ({self.best_record['total']}문제 중 {self.best_record['correct']}문제 정답)"
         print(f"\n🏆 최고 점수: {self.best_score}점{detail}")
+
+    # ------------------------------------------------------------------ 퀴즈 삭제
+    def delete_quiz(self):
+        """번호를 골라 퀴즈를 삭제하고 파일에 반영한다."""
+        if not self.quizzes:
+            print("\n📭 삭제할 퀴즈가 없습니다.")
+            return
+        self.list_quizzes()
+        count = len(self.quizzes)
+        number = self.read_number(f"삭제할 퀴즈 번호 (1-{count}, 취소: 0): ", 0, count)
+        if number == 0:
+            print("↩️ 삭제를 취소했습니다.")
+            return
+        removed = self.quizzes.pop(number - 1)
+        self.save()
+        print(f"🗑️ '{removed.question}' 퀴즈를 삭제했습니다. (남은 퀴즈 {len(self.quizzes)}개)")
 
     # ------------------------------------------------------------------ 저장 / 불러오기
     def load(self):
