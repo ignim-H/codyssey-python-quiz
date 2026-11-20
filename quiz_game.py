@@ -21,7 +21,14 @@ class QuizGame:
         self.best_record = None  # 최고 점수를 낸 기록 {"correct": 맞힌 수, "total": 문제 수}
         self.store = StateStore(state_path)
         self.echo_input = os.environ.get("QUIZ_ECHO_INPUT") == "1"  # 파일로 입력할 때 입력값도 화면에 표시
-    MENU_ITEMS = ["퀴즈 풀기", "퀴즈 추가", "퀴즈 목록", "점수 확인", "종료"]
+        # 메뉴 번호 → (이름, 실행할 메서드). 메뉴를 추가할 때 이 목록만 고치면 된다.
+        self.menu = [
+            ("퀴즈 풀기", self.play_quiz),
+            ("퀴즈 추가", self.add_quiz),
+            ("퀴즈 목록", self.list_quizzes),
+            ("점수 확인", self.show_score),
+            ("종료", None),
+        ]
 
     # ------------------------------------------------------------------ 실행 흐름
     def run(self):
@@ -33,16 +40,10 @@ class QuizGame:
             self.load()
             while True:
                 choice = self.select_menu()
-                if choice == 1:
-                    self.play_quiz()
-                elif choice == 2:
-                    self.add_quiz()
-                elif choice == 3:
-                    self.list_quizzes()
-                elif choice == 4:
-                    self.show_score()
-                else:
+                name, action = self.menu[choice - 1]
+                if action is None:
                     break
+                action()
         except QuitGame:
             print("\n⚠️ 입력이 중단되었습니다.")
             if self.save():
@@ -56,14 +57,14 @@ class QuizGame:
         """메뉴 목록을 출력한다."""
         print()
         print(LINE)
-        for number, name in enumerate(self.MENU_ITEMS, start=1):
+        for number, (name, _) in enumerate(self.menu, start=1):
             print(f"{number}. {name}")
         print(LINE)
 
     def select_menu(self):
         """메뉴를 보여 주고 올바른 번호를 받을 때까지 반복한다."""
         self.show_menu()
-        return self.read_number("선택: ", 1, len(self.MENU_ITEMS))
+        return self.read_number("선택: ", 1, len(self.menu))
 
     # ------------------------------------------------------------------ 입력 처리
     def read_line(self, prompt):
