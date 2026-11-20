@@ -35,7 +35,7 @@ class QuizGame:
                 elif choice == 2:
                     self.add_quiz()
                 elif choice == 3:
-                    print("🚧 준비 중인 기능입니다.")
+                    self.list_quizzes()
                 elif choice == 4:
                     print("🚧 준비 중인 기능입니다.")
                 else:
@@ -135,3 +135,15 @@ class QuizGame:
         answer = self.read_number(f"정답 번호 (1-{Quiz.CHOICE_COUNT}): ", 1, Quiz.CHOICE_COUNT)
         self.quizzes.append(Quiz(question, choices, answer))
         print(f"\n✅ 퀴즈가 추가되었습니다! (총 {len(self.quizzes)}개)")
+
+    # ------------------------------------------------------------------ 퀴즈 목록
+    def list_quizzes(self):
+        """등록된 퀴즈의 문제 목록을 출력한다."""
+        if not self.quizzes:
+            print("\n📭 등록된 퀴즈가 없습니다.")
+            return
+        print(f"\n📋 등록된 퀴즈 목록 (총 {len(self.quizzes)}개)")
+        print(THIN_LINE)
+        for number, quiz in enumerate(self.quizzes, start=1):
+            print(f"[{number}] {quiz.question}")
+        print(THIN_LINE)
