@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# 실행할 때마다 바뀌는 사용자 데이터 (README 6장 참고)
+state.json
+state.json.bak
+state.json.tmp
+
+# 에디터 / OS
+.vscode/
+.DS_Store
+Thumbs.db
