@@ -1,0 +1,195 @@
+$ cd ~/Documents/codyssey-python-quiz
+$ git init -b main
+Initialized empty Git repository in ~/Documents/codyssey-python-quiz/.git/
+
+$ git remote add origin https://github.com/ignim-H/codyssey-python-quiz.git
+
+$ git add -A
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Chore: 프로젝트 초기 설정 (.gitignore, README)"
+[main (root-commit) bdd9162] Chore: 프로젝트 초기 설정 (.gitignore, README)
+ 2 files changed, 16 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+
+$ git push -u origin main
+To https://github.com/ignim-H/codyssey-python-quiz.git
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.
+
+$ git add -A
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'main.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Feat: 메뉴 출력과 입력 검증 구현 (공백·문자·범위·빈 입력, Ctrl+C/EOF 처리)"
+[main 366800d] Feat: 메뉴 출력과 입력 검증 구현 (공백·문자·범위·빈 입력, Ctrl+C/EOF 처리)
+ 2 files changed, 106 insertions(+)
+ create mode 100644 main.py
+ create mode 100644 quiz_game.py
+
+$ git add -A
+warning: in the working copy of 'quiz.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Feat: Quiz 클래스 구현 (문제·선택지·정답, 출력·정답 확인·dict 변환)"
+[main 642d666] Feat: Quiz 클래스 구현 (문제·선택지·정답, 출력·정답 확인·dict 변환)
+ 1 file changed, 57 insertions(+)
+ create mode 100644 quiz.py
+
+$ git add -A
+warning: in the working copy of 'quiz.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'default_quizzes.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Feat: 기본 퀴즈 데이터 7개 작성 (주제: 리눅스·Docker·Git)"
+[main 3c276be] Feat: 기본 퀴즈 데이터 7개 작성 (주제: 리눅스·Docker·Git)
+ 2 files changed, 46 insertions(+), 1 deletion(-)
+ create mode 100644 default_quizzes.py
+
+$ git checkout -b feature/play-quiz
+Switched to a new branch 'feature/play-quiz'
+
+$ git add -A
+warning: in the working copy of 'quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Feat: 퀴즈 풀기 기능 구현 (출제·정답 확인·결과·최고 점수 갱신)"
+[feature/play-quiz 6ee0c02] Feat: 퀴즈 풀기 기능 구현 (출제·정답 확인·결과·최고 점수 갱신)
+ 1 file changed, 32 insertions(+), 1 deletion(-)
+
+$ git push -u origin feature/play-quiz
+remote: 
+remote: Create a pull request for 'feature/play-quiz' on GitHub by visiting:        
+remote:      https://github.com/ignim-H/codyssey-python-quiz/pull/new/feature/play-quiz        
+remote: 
+To https://github.com/ignim-H/codyssey-python-quiz.git
+ * [new branch]      feature/play-quiz -> feature/play-quiz
+branch 'feature/play-quiz' set up to track 'origin/feature/play-quiz'.
+
+$ git checkout main
+Switched to branch 'main'
+Your branch is ahead of 'origin/main' by 3 commits.
+  (use "git push" to publish your local commits)
+
+$ git merge --no-ff feature/play-quiz -m "Merge: feature/play-quiz 브랜치 병합 (퀴즈 풀기 기능)"
+Merge made by the 'ort' strategy.
+ quiz_game.py | 33 ++++++++++++++++++++++++++++++++-
+ 1 file changed, 32 insertions(+), 1 deletion(-)
+
+$ git add -A
+warning: in the working copy of 'quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Feat: 퀴즈 추가 기능 구현 (문제·선택지 4개·정답 번호 입력 검증)"
+[main cee6ab4] Feat: 퀴즈 추가 기능 구현 (문제·선택지 4개·정답 번호 입력 검증)
+ 1 file changed, 20 insertions(+), 1 deletion(-)
+
+$ git add -A
+warning: in the working copy of 'quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Feat: 퀴즈 목록 기능 구현"
+[main 3fda1dd] Feat: 퀴즈 목록 기능 구현
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+$ git add -A
+warning: in the working copy of 'quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Feat: 점수 확인 기능 구현 (미응시 안내 포함)"
+[main 262e8e8] Feat: 점수 확인 기능 구현 (미응시 안내 포함)
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+$ git add -A
+warning: in the working copy of 'main.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'storage.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Feat: state.json 저장/불러오기 구현 (UTF-8, 손상 파일 백업 후 복구)"
+[main 3263202] Feat: state.json 저장/불러오기 구현 (UTF-8, 손상 파일 백업 후 복구)
+ 3 files changed, 107 insertions(+), 3 deletions(-)
+ create mode 100644 storage.py
+
+$ git add -A
+warning: in the working copy of 'main.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'storage.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Refactor: QuizGame 메뉴 처리를 메뉴 테이블로 정리"
+[main bab334c] Refactor: QuizGame 메뉴 처리를 메뉴 테이블로 정리
+ 1 file changed, 13 insertions(+), 12 deletions(-)
+
+$ git add -A
+warning: in the working copy of 'default_quizzes.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quiz.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Feat: 랜덤 출제·문제 수 선택·힌트 기능 추가 (보너스)"
+[main d81b2b3] Feat: 랜덤 출제·문제 수 선택·힌트 기능 추가 (보너스)
+ 3 files changed, 55 insertions(+), 12 deletions(-)
+
+$ git add -A
+warning: in the working copy of 'default_quizzes.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quiz.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Feat: 퀴즈 삭제 기능 추가 (보너스)"
+[main 5b1f89e] Feat: 퀴즈 삭제 기능 추가 (보너스)
+ 1 file changed, 17 insertions(+)
+
+$ git add -A
+warning: in the working copy of 'quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Feat: 점수 기록 히스토리 저장 및 표시 (보너스)"
+[main bc6224d] Feat: 점수 기록 히스토리 저장 및 표시 (보너스)
+ 1 file changed, 29 insertions(+)
+
+$ git add -A
+warning: in the working copy of 'quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/test_quiz_game.py', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Test: Quiz·StateStore·QuizGame 단위 테스트 추가"
+[main 7375e59] Test: Quiz·StateStore·QuizGame 단위 테스트 추가
+ 1 file changed, 123 insertions(+)
+ create mode 100644 tests/test_quiz_game.py
+
+$ git add -A
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Docs: README 작성 (개요·주제 선정 이유·실행 방법·기능·파일 구조·state.json)"
+[main 476490d] Docs: README 작성 (개요·주제 선정 이유·실행 방법·기능·파일 구조·state.json)
+ 1 file changed, 208 insertions(+), 1 deletion(-)
+
+$ git push origin main
+To https://github.com/ignim-H/codyssey-python-quiz.git
+   bdd9162..476490d  main -> main
+
+$ cd ~/Documents
+$ git clone https://github.com/ignim-H/codyssey-python-quiz.git codyssey-python-quiz-clone
+Cloning into 'codyssey-python-quiz-clone'...
+
+$ cd ~/Documents/codyssey-python-quiz-clone
+$ (README.md 에 문장 한 줄 추가)
+$ git add README.md
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+
+$ git commit -m "Docs: clone 실습 - 복제한 저장소에서 README 문구 추가"
+[main 7cd76e0] Docs: clone 실습 - 복제한 저장소에서 README 문구 추가
+ 1 file changed, 2 insertions(+)
+
+$ git push origin main
+To https://github.com/ignim-H/codyssey-python-quiz.git
+   476490d..7cd76e0  main -> main
+
+$ cd ~/Documents/codyssey-python-quiz
+$ git pull origin main
+From https://github.com/ignim-H/codyssey-python-quiz
+ * branch            main       -> FETCH_HEAD
+   476490d..7cd76e0  main       -> origin/main
+Updating 476490d..7cd76e0
+Fast-forward
+ README.md | 2 ++
+ 1 file changed, 2 insertions(+)
+
+$ grep "clone 실습" README.md
+> ✅ clone 실습: 별도 폴더에 복제한 저장소에서 이 문장을 추가하고 commit → push 했습니다. (2026-11-21)
+

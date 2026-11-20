@@ -1,0 +1,17 @@
+$ python -m unittest discover -s tests -v
+test_best_score_persists_between_runs (test_quiz_game.QuizGameTest.test_best_score_persists_between_runs) ... ok
+test_ctrl_c_saves_and_exits_safely (test_quiz_game.QuizGameTest.test_ctrl_c_saves_and_exits_safely) ... ok
+test_first_run_uses_default_quizzes_and_creates_file (test_quiz_game.QuizGameTest.test_first_run_uses_default_quizzes_and_creates_file) ... ok
+test_invalid_schema_recovers_with_defaults (test_quiz_game.QuizGameTest.test_invalid_schema_recovers_with_defaults) ... ok
+test_read_number_retries_until_valid (test_quiz_game.QuizGameTest.test_read_number_retries_until_valid) ... ok
+test_dict_round_trip_keeps_hint (test_quiz_game.QuizTest.test_dict_round_trip_keeps_hint) ... ok
+test_from_dict_rejects_bad_data (test_quiz_game.QuizTest.test_from_dict_rejects_bad_data) ... ok
+test_is_correct (test_quiz_game.QuizTest.test_is_correct) ... ok
+test_corrupted_file_is_backed_up (test_quiz_game.StateStoreTest.test_corrupted_file_is_backed_up) ... ok
+test_missing_file (test_quiz_game.StateStoreTest.test_missing_file) ... ok
+test_save_and_load_utf8 (test_quiz_game.StateStoreTest.test_save_and_load_utf8) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.018s
+
+OK

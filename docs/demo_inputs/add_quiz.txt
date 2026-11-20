@@ -1,0 +1,11 @@
+2
+Docker 이미지 목록을 확인하는 명령어는?
+docker ps
+
+docker images
+docker logs
+docker info
+0
+2
+이미지는 영어로 images
+6
