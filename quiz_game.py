@@ -3,6 +3,7 @@
 import os
 
 from default_quizzes import create_default_quizzes
+from quiz import Quiz
 
 LINE = "=" * 40
 THIN_LINE = "-" * 40
@@ -32,7 +33,7 @@ class QuizGame:
                 if choice == 1:
                     self.play_quiz()
                 elif choice == 2:
-                    print("🚧 준비 중인 기능입니다.")
+                    self.add_quiz()
                 elif choice == 3:
                     print("🚧 준비 중인 기능입니다.")
                 elif choice == 4:
@@ -86,6 +87,14 @@ class QuizGame:
                 continue
             return number
 
+    def read_text(self, prompt):
+        """비어 있지 않은 문자열을 받을 때까지 반복한다."""
+        while True:
+            text = self.read_line(prompt)
+            if text:
+                return text
+            print("⚠️ 빈 값은 입력할 수 없습니다. 다시 입력하세요.")
+
     # ------------------------------------------------------------------ 퀴즈 풀기
     def play_quiz(self):
         """퀴즈를 출제하고 정답 여부와 결과를 보여 준 뒤 최고 점수를 갱신한다."""
@@ -116,3 +125,13 @@ class QuizGame:
             self.best_record = {"correct": correct, "total": total}
             print("🎉 새로운 최고 점수입니다!")
         print(LINE)
+
+    # ------------------------------------------------------------------ 퀴즈 추가
+    def add_quiz(self):
+        """문제, 선택지 4개, 정답 번호를 입력받아 새 퀴즈를 등록한다."""
+        print("\n📌 새로운 퀴즈를 추가합니다.")
+        question = self.read_text("문제를 입력하세요: ")
+        choices = [self.read_text(f"선택지 {index}: ") for index in range(1, Quiz.CHOICE_COUNT + 1)]
+        answer = self.read_number(f"정답 번호 (1-{Quiz.CHOICE_COUNT}): ", 1, Quiz.CHOICE_COUNT)
+        self.quizzes.append(Quiz(question, choices, answer))
+        print(f"\n✅ 퀴즈가 추가되었습니다! (총 {len(self.quizzes)}개)")
