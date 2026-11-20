@@ -2,6 +2,7 @@
 
 import os
 import random
+from datetime import datetime
 
 from default_quizzes import create_default_quizzes
 from quiz import Quiz
@@ -17,11 +18,13 @@ class QuizGame:
     """퀴즈 목록과 최고 점수를 가지고 게임 전체를 진행한다."""
 
     HINT_PENALTY = 0.5  # 힌트를 본 문제는 맞혀도 절반 점수
+    HISTORY_SHOW = 5    # 점수 확인 화면에 보여 줄 최근 기록 수
 
     def __init__(self, state_path="state.json"):
         self.quizzes = []  # Quiz 객체 목록 (load 에서 채움)
         self.best_score = None   # 최고 점수(0~100). 아직 풀지 않았으면 None
         self.best_record = None  # 최고 점수를 낸 기록 {"correct": 맞힌 수, "total": 문제 수}
+        self.history = []        # 모든 게임 기록 (날짜/시간, 문제 수, 정답 수, 점수)
         self.store = StateStore(state_path)
         self.echo_input = os.environ.get("QUIZ_ECHO_INPUT") == "1"  # 파일로 입력할 때 입력값도 화면에 표시
         # QUIZ_RANDOM_SEED 를 주면 출제 순서가 매번 같아진다 (테스트/시연용). 없으면 매번 무작위.
@@ -152,12 +155,23 @@ class QuizGame:
         score = round(points / total * 100)
         print(LINE)
         print(f"🏆 결과: {total}문제 중 {correct}문제 정답! ({score}점, 힌트 {hints_used}회 사용)")
+        self.record_result(score, correct, total, hints_used)
         if self.best_score is None or score > self.best_score:
             self.best_score = score
             self.best_record = {"correct": correct, "total": total}
             print("🎉 새로운 최고 점수입니다!")
         print(LINE)
         self.save()
+
+    def record_result(self, score, correct, total, hints_used):
+        """게임 한 판의 결과를 기록 히스토리에 추가한다."""
+        self.history.append({
+            "played_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "total": total,
+            "correct": correct,
+            "hints_used": hints_used,
+            "score": score,
+        })
 
     # ------------------------------------------------------------------ 퀴즈 추가
     def add_quiz(self):
@@ -194,6 +208,15 @@ class QuizGame:
         if self.best_record:
             detail = f" ({self.best_record['total']}문제 중 {self.best_record['correct']}문제 정답)"
         print(f"\n🏆 최고 점수: {self.best_score}점{detail}")
+        if self.history:
+            print(f"\n🕘 최근 기록 (전체 {len(self.history)}회 중 최근 {min(len(self.history), self.HISTORY_SHOW)}회)")
+            print(THIN_LINE)
+            for record in self.history[-self.HISTORY_SHOW:][::-1]:
+                print(
+                    f"{record['played_at']} | {record['total']}문제 중 {record['correct']}개 정답"
+                    f" | 힌트 {record['hints_used']}회 | {record['score']}점"
+                )
+            print(THIN_LINE)
 
     # ------------------------------------------------------------------ 퀴즈 삭제
     def delete_quiz(self):
@@ -224,6 +247,9 @@ class QuizGame:
                 ):
                     raise ValueError("best_score 는 0~100 사이의 정수여야 합니다")
                 best_record = data.get("best_record")
+                history = data.get("history", [])
+                if not isinstance(history, list):
+                    raise ValueError("history 는 목록이어야 합니다")
             except (ValueError, TypeError, AttributeError) as error:
                 backup = self.store.backup_corrupted()
                 message = f"⚠️ state.json 내용이 올바르지 않아 기본 퀴즈로 복구합니다. ({error}, 원본 보관: {backup})"
@@ -231,6 +257,7 @@ class QuizGame:
                 self.quizzes = quizzes
                 self.best_score = best_score
                 self.best_record = best_record if isinstance(best_record, dict) else None
+                self.history = history
                 best_text = f"{best_score}점" if best_score is not None else "기록 없음"
                 print(f"📂 저장된 데이터를 불러왔습니다. (퀴즈 {len(quizzes)}개, 최고점수 {best_text})")
                 return
@@ -239,6 +266,7 @@ class QuizGame:
         self.quizzes = create_default_quizzes()
         self.best_score = None
         self.best_record = None
+        self.history = []
         self.save()
 
     def save(self):
@@ -247,5 +275,6 @@ class QuizGame:
             "quizzes": [quiz.to_dict() for quiz in self.quizzes],
             "best_score": self.best_score,
             "best_record": self.best_record,
+            "history": self.history,
         }
         return self.store.save(data)
