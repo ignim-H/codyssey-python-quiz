@@ -37,7 +37,7 @@ class QuizGame:
                 elif choice == 3:
                     self.list_quizzes()
                 elif choice == 4:
-                    print("🚧 준비 중인 기능입니다.")
+                    self.show_score()
                 else:
                     break
         except QuitGame:
@@ -147,3 +147,14 @@ class QuizGame:
         for number, quiz in enumerate(self.quizzes, start=1):
             print(f"[{number}] {quiz.question}")
         print(THIN_LINE)
+
+    # ------------------------------------------------------------------ 점수 확인
+    def show_score(self):
+        """최고 점수를 보여 준다. 아직 풀지 않았으면 안내한다."""
+        if self.best_score is None:
+            print("\n📭 아직 퀴즈를 풀지 않았습니다. 1번 '퀴즈 풀기'로 도전해 보세요!")
+            return
+        detail = ""
+        if self.best_record:
+            detail = f" ({self.best_record['total']}문제 중 {self.best_record['correct']}문제 정답)"
+        print(f"\n🏆 최고 점수: {self.best_score}점{detail}")
